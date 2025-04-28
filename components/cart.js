@@ -1,3 +1,5 @@
+// components/Cart.js
+
 export default function Cart({ sepet, siparisVer }) {
   if (sepet.length === 0) return null;
 
