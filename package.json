@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "date-fns": "^4.1.0",
     "firebase": "^9.22.0",
     "framer-motion": "^10.12.16",
     "next": "^13.4.10",
