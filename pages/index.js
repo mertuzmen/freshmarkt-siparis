@@ -1,4 +1,4 @@
-""// GÜNCEL TASARIM: Getir Benzeri Arayüz ile FreshMarkt Sipariş Sayfası
+// GÜNCEL TASARIM: Kategoriye Göre Ürün Yerleşimi (Sebze & Meyve)
 
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -39,12 +39,26 @@ initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
-const urunler = [
-  { ad: "Yerli Muz", miktar: "750 g", resim: "/urunler/yerli-muz.png" },
-  { ad: "İthal Muz Paket", miktar: "650 g", resim: "/urunler/ithal-muz.png" },
-  { ad: "Yaban Mersini Paket", miktar: "125 g", resim: "/urunler/yabanmersini.png" },
-  { ad: "Portakal", miktar: "1 kg", resim: "/urunler/portakal.png" },
-  { ad: "Greyfurt", miktar: "1 kg", resim: "/urunler/greyfurt.png" },
+const sebzeler = [
+  { ad: "Maydanoz", birim: "adet", resim: "/urunler/maydanoz.png" },
+  { ad: "Dereotu", birim: "adet", resim: "/urunler/dereotu.png" },
+  { ad: "Marul", birim: "adet", resim: "/urunler/marul.png" },
+  { ad: "Nane", birim: "adet", resim: "/urunler/nane.png" },
+  { ad: "Roka", birim: "adet", resim: "/urunler/roka.png" },
+  { ad: "Patates", birim: "kg", resim: "/urunler/patates.png" },
+  { ad: "Soğan", birim: "kg", resim: "/urunler/sogan.png" },
+  { ad: "Biber", birim: "kg", resim: "/urunler/biber.png" },
+  { ad: "Salatalık", birim: "kg", resim: "/urunler/salatalik.png" }
+];
+
+const meyveler = [
+  { ad: "Yerli Muz", birim: "kg", resim: "/urunler/yerli-muz.png" },
+  { ad: "İthal Muz", birim: "kg", resim: "/urunler/ithal-muz.png" },
+  { ad: "Portakal", birim: "kg", resim: "/urunler/portakal.png" },
+  { ad: "Greyfurt", birim: "kg", resim: "/urunler/greyfurt.png" },
+  { ad: "Elma", birim: "kg", resim: "/urunler/elma.png" },
+  { ad: "Kivi", birim: "kg", resim: "/urunler/kivi.png" },
+  { ad: "Mandalina", birim: "kg", resim: "/urunler/mandalina.png" }
 ];
 
 export default function Home() {
@@ -92,11 +106,7 @@ export default function Home() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <p className="text-xl">Yükleniyor...</p>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-white text-xl">Yükleniyor...</div>;
   }
 
   if (!user) {
@@ -133,15 +143,38 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {urunler.map((urun, i) => (
-          <div key={i} className="bg-white shadow rounded-xl p-4 text-center hover:shadow-lg transition-all">
-            <Image src={urun.resim} alt={urun.ad} width={120} height={120} className="mx-auto mb-2 rounded" />
-            <p className="font-bold text-sm text-gray-900 mt-1">{urun.ad}</p>
-            <p className="text-xs text-gray-500 mb-2">{urun.miktar}</p>
-            <button onClick={() => sepeteEkle(urun.ad)} className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-full">Sepete Ekle</button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h2 className="text-lg font-bold text-green-700 mb-2">Sebzeler</h2>
+          <div className="grid gap-4">
+            {sebzeler.map((urun, i) => (
+              <Card key={i} className="flex items-center p-4 bg-white shadow hover:shadow-lg">
+                <Image src={urun.resim} alt={urun.ad} width={80} height={80} className="mr-4" />
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">{urun.ad}</p>
+                  <p className="text-sm text-gray-600">Birim: {urun.birim}</p>
+                </div>
+                <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={() => sepeteEkle(urun.ad)}>Sepete Ekle</Button>
+              </Card>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div>
+          <h2 className="text-lg font-bold text-purple-700 mb-2">Meyveler</h2>
+          <div className="grid gap-4">
+            {meyveler.map((urun, i) => (
+              <Card key={i} className="flex items-center p-4 bg-white shadow hover:shadow-lg">
+                <Image src={urun.resim} alt={urun.ad} width={80} height={80} className="mr-4" />
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">{urun.ad}</p>
+                  <p className="text-sm text-gray-600">Birim: {urun.birim}</p>
+                </div>
+                <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={() => sepeteEkle(urun.ad)}>Sepete Ekle</Button>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="mt-8">
