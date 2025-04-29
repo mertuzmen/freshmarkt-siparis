@@ -1,4 +1,4 @@
-// GÜNCEL TASARIM: Getir Benzeri Kartlar, Ürün Bilgisi (kg/adet), Arka Plan Beyaz
+// GÜNCEL TASARIM: Getir Benzeri Kartlar, Ürün Bilgisi (kg/adet), Arka Plan Beyaz + Sepet Sayfası ve Bildirim Hazırlığı
 
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "../components/ui/input";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Logo from "../public/logo.png";
+import Link from "next/link";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -67,6 +68,7 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [firma, setFirma] = useState("");
   const [siparisler, setSiparisler] = useState([]);
+  const [sepet, setSepet] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -89,18 +91,9 @@ export default function Home() {
     await signOut(auth);
   };
 
-  const siparisEkle = async (urun, miktar, not) => {
+  const siparisEkle = (urun, miktar, not) => {
     if (!miktar) return;
-    const yeni = {
-      firma: user.displayName,
-      urun: urun.ad,
-      miktar,
-      birim: urun.birim,
-      not,
-      createdAt: serverTimestamp()
-    };
-    await addDoc(collection(db, "siparisler"), yeni);
-    loadSiparisler();
+    setSepet((prev) => [...prev, { ...urun, miktar, not }]);
   };
 
   const loadSiparisler = async () => {
@@ -116,8 +109,8 @@ export default function Home() {
         <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-2" />
         <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-4" />
         <div className="flex gap-2">
-          <Button onClick={kaydol} className="bg-yellow-500 hover:bg-yellow-600 text-white">Kaydol</Button>
-          <Button onClick={girisYap} className="bg-lime-600 hover:bg-lime-700 text-white">Giriş Yap</Button>
+          <Button onClick={kaydol} className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4">Kaydol</Button>
+          <Button onClick={girisYap} className="bg-lime-600 hover:bg-lime-700 text-white font-semibold px-4">Giriş Yap</Button>
         </div>
       </div>
     );
@@ -128,24 +121,30 @@ export default function Home() {
     const [not, setNot] = useState("");
 
     return (
-      <Card key={urun.ad} className="mb-4 shadow-lg border">
+      <Card key={urun.ad} className="mb-4 shadow-md border rounded-xl bg-white">
         <CardContent className="text-center p-4">
           <Image src={urun.resim} alt={urun.ad} width={80} height={80} className="mx-auto mb-2" />
-          <div className="font-semibold text-lg mb-1">{urun.ad}</div>
+          <div className="font-semibold text-base mb-1">{urun.ad}</div>
           <div className="text-sm text-gray-500 mb-2">Birim: {urun.birim}</div>
           <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} className="mb-2" />
           <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} className="mb-2" />
-          <Button onClick={() => siparisEkle(urun, miktar, not)} className="bg-lime-600 hover:bg-lime-700 text-white">Sepete Ekle</Button>
+          <Button onClick={() => siparisEkle(urun, miktar, not)} className="bg-lime-500 hover:bg-lime-600 text-white font-medium px-4 py-2 rounded-full">Sepete Ekle</Button>
         </CardContent>
       </Card>
     );
   };
 
   return (
-    <div className="min-h-screen bg-white p-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="flex justify-between items-center mb-6 border-b pb-2">
         <Image src={Logo} alt="FreshMarkt" width={100} height={100} />
-        <Button onClick={cikisYap} className="bg-red-500 hover:bg-red-600 text-white">Çıkış Yap</Button>
+        <div className="flex items-center gap-4">
+          <Link href="/sepet" className="relative">
+            <span className="absolute -top-2 -right-2 bg-lime-600 text-white text-xs px-1 rounded-full">{sepet.length}</span>
+            🛒
+          </Link>
+          <Button onClick={cikisYap} className="bg-gray-600 hover:bg-gray-700 text-white font-medium px-4 py-2 rounded-full">Çıkış Yap</Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
