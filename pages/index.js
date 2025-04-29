@@ -1,4 +1,4 @@
-// YENİ TASARIM: FreshMarkt giriş ekranı kurumsal tasarımı ve gelişmiş sepet yönetimi
+// GÜNCEL TASARIM: Modern Ürün Kartları ile FreshMarkt Sipariş Sayfası
 
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -40,10 +40,11 @@ const auth = getAuth();
 const db = getFirestore();
 
 const urunler = [
-  { ad: "Elma", aciklama: "Taze kırmızı elma", birim: "kg", resim: "/urunler/elma.png" },
-  { ad: "Domates", aciklama: "Organik domates", birim: "kg", resim: "/urunler/domates.png" },
-  { ad: "Muz", aciklama: "İthal muz", birim: "kg", resim: "/urunler/muz.png" },
-  { ad: "Salatalık", aciklama: "Seradan taze salatalık", birim: "kg", resim: "/urunler/salatalik.png" },
+  { ad: "Yerli Muz", fiyat: 62.99, miktar: "750 g", resim: "/urunler/yerli-muz.png" },
+  { ad: "İthal Muz Paket", fiyat: 84.99, miktar: "650 g", resim: "/urunler/ithal-muz.png" },
+  { ad: "Yaban Mersini Paket", fiyat: 134.99, miktar: "125 g", resim: "/urunler/yabanmersini.png" },
+  { ad: "Portakal", fiyat: 42.99, miktar: "1 kg", resim: "/urunler/portakal.png" },
+  { ad: "Greyfurt", fiyat: 32.99, miktar: "1 kg", resim: "/urunler/greyfurt.png" },
 ];
 
 export default function Home() {
@@ -100,9 +101,9 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-200 to-green-500 text-white flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-lime-100 to-emerald-200 text-white flex flex-col items-center justify-center p-4">
         <div className="mb-4">
-          <Image src={Logo} alt="Logo" width={120} height={120} className="rounded-full shadow-md" />
+          <Image src={Logo} alt="Logo" width={120} height={120} className="rounded-full shadow-md mx-auto" />
         </div>
         <Card className="w-full max-w-md text-black">
           <CardContent className="p-6">
@@ -112,8 +113,8 @@ export default function Home() {
               <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
               <div className="flex gap-2 pt-2">
-                <Button className="bg-green-500 hover:bg-green-600 text-white w-full" onClick={kaydol}>Kayıt Ol</Button>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full" onClick={girisYap}>Giriş Yap</Button>
+                <Button className="bg-yellow-500 hover:bg-yellow-600 text-white w-full" onClick={kaydol}>Kayıt Ol</Button>
+                <Button className="bg-green-600 hover:bg-green-700 text-white w-full" onClick={girisYap}>Giriş Yap</Button>
               </div>
             </div>
           </CardContent>
@@ -131,17 +132,15 @@ export default function Home() {
           <button className="text-lg">🛒</button>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {urunler.map((urun, i) => (
-          <Card key={i} className="shadow-md">
-            <CardContent className="p-4">
-              <Image src={urun.resim} alt={urun.ad} width={100} height={100} className="mb-2" />
-              <h3 className="font-semibold text-lg">{urun.ad}</h3>
-              <p className="text-sm text-gray-600">{urun.aciklama}</p>
-              <p className="text-sm">Birim: {urun.birim}</p>
-              <Button className="mt-2 w-full bg-green-600 text-white" onClick={() => sepeteEkle(urun.ad)}>Sepete Ekle</Button>
-            </CardContent>
-          </Card>
+          <div key={i} className="bg-white shadow rounded-xl p-4 text-center hover:shadow-lg transition">
+            <Image src={urun.resim} alt={urun.ad} width={120} height={120} className="mx-auto mb-2" />
+            <p className="text-purple-600 font-bold text-lg">₺{urun.fiyat}</p>
+            <p className="font-semibold text-sm mt-1">{urun.ad}</p>
+            <p className="text-xs text-gray-500 mb-2">{urun.miktar}</p>
+            <button onClick={() => sepeteEkle(urun.ad)} className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded-full text-sm">+</button>
+          </div>
         ))}
       </div>
 
