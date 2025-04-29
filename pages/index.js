@@ -1,4 +1,4 @@
-// GÜNCEL TASARIM: Kategoriye Göre Ürün Yerleşimi (Sebze & Meyve)
+// GÜNCEL TASARIM: Ürün Kartlarında Lokal Miktar/Not - Mobil Uyumlu
 
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -67,9 +67,6 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [firma, setFirma] = useState("");
   const [siparisler, setSiparisler] = useState([]);
-  const [yeniSiparis, setYeniSiparis] = useState("");
-  const [miktar, setMiktar] = useState("");
-  const [not, setNot] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -92,7 +89,8 @@ export default function Home() {
     await signOut(auth);
   };
 
-  const siparisEkle = async (urun) => {
+  const siparisEkle = async (urun, miktar, not) => {
+    if (!miktar) return;
     const yeni = {
       firma: user.displayName,
       urun: urun.ad,
@@ -102,8 +100,6 @@ export default function Home() {
       createdAt: serverTimestamp()
     };
     await addDoc(collection(db, "siparisler"), yeni);
-    setMiktar("");
-    setNot("");
     loadSiparisler();
   };
 
@@ -127,6 +123,25 @@ export default function Home() {
     );
   }
 
+  const UrunKart = ({ urun }) => {
+    const [miktar, setMiktar] = useState("");
+    const [not, setNot] = useState("");
+
+    return (
+      <Card key={urun.ad} className="mb-3">
+        <CardContent className="flex items-center gap-4">
+          <Image src={urun.resim} alt={urun.ad} width={60} height={60} className="rounded" />
+          <div className="flex-1">
+            <div className="font-medium">{urun.ad}</div>
+            <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} className="mb-1" />
+            <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} />
+          </div>
+          <Button onClick={() => siparisEkle(urun, miktar, not)}>Sepete Ekle</Button>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between mb-4">
@@ -137,34 +152,14 @@ export default function Home() {
         <div>
           <h2 className="text-lg font-semibold mb-2">Sebzeler</h2>
           {sebzeler.map((urun) => (
-            <Card key={urun.ad} className="mb-3">
-              <CardContent className="flex items-center gap-4">
-                <Image src={urun.resim} alt={urun.ad} width={60} height={60} className="rounded" />
-                <div className="flex-1">
-                  <div className="font-medium">{urun.ad}</div>
-                  <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} />
-                  <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} />
-                </div>
-                <Button onClick={() => siparisEkle(urun)}>Sepete Ekle</Button>
-              </CardContent>
-            </Card>
+            <UrunKart key={urun.ad} urun={urun} />
           ))}
         </div>
 
         <div>
           <h2 className="text-lg font-semibold mb-2">Meyveler</h2>
           {meyveler.map((urun) => (
-            <Card key={urun.ad} className="mb-3">
-              <CardContent className="flex items-center gap-4">
-                <Image src={urun.resim} alt={urun.ad} width={60} height={60} className="rounded" />
-                <div className="flex-1">
-                  <div className="font-medium">{urun.ad}</div>
-                  <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} />
-                  <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} />
-                </div>
-                <Button onClick={() => siparisEkle(urun)}>Sepete Ekle</Button>
-              </CardContent>
-            </Card>
+            <UrunKart key={urun.ad} urun={urun} />
           ))}
         </div>
       </div>
