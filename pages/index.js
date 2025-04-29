@@ -61,4 +61,113 @@ const meyveler = [
   { ad: "Mandalina", birim: "kg", resim: "/urunler/mandalina.jpg" }
 ];
 
-// ... (kalan kodlar aynı şekilde devam eder)
+export default function Home() {
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firma, setFirma] = useState("");
+  const [siparisler, setSiparisler] = useState([]);
+  const [yeniSiparis, setYeniSiparis] = useState("");
+  const [miktar, setMiktar] = useState("");
+  const [not, setNot] = useState("");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) loadSiparisler();
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const kaydol = async () => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(userCredential.user, { displayName: firma });
+  };
+
+  const girisYap = async () => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const cikisYap = async () => {
+    await signOut(auth);
+  };
+
+  const siparisEkle = async (urun) => {
+    const yeni = {
+      firma: user.displayName,
+      urun: urun.ad,
+      miktar,
+      birim: urun.birim,
+      not,
+      createdAt: serverTimestamp()
+    };
+    await addDoc(collection(db, "siparisler"), yeni);
+    setMiktar("");
+    setNot("");
+    loadSiparisler();
+  };
+
+  const loadSiparisler = async () => {
+    const snapshot = await getDocs(collection(db, "siparisler"));
+    setSiparisler(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-green-100 p-4">
+        <Image src={Logo} alt="Logo" width={120} height={120} className="mb-4" />
+        <Input placeholder="Firma Adı" value={firma} onChange={(e) => setFirma(e.target.value)} className="mb-2" />
+        <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-2" />
+        <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-4" />
+        <div className="flex gap-2">
+          <Button onClick={kaydol}>Kaydol</Button>
+          <Button onClick={girisYap}>Giriş Yap</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4">
+      <div className="flex justify-between mb-4">
+        <h1 className="text-xl font-bold">Hoşgeldin {user.displayName}</h1>
+        <Button onClick={cikisYap}>Çıkış</Button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Sebzeler</h2>
+          {sebzeler.map((urun) => (
+            <Card key={urun.ad} className="mb-3">
+              <CardContent className="flex items-center gap-4">
+                <Image src={urun.resim} alt={urun.ad} width={60} height={60} className="rounded" />
+                <div className="flex-1">
+                  <div className="font-medium">{urun.ad}</div>
+                  <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} />
+                  <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} />
+                </div>
+                <Button onClick={() => siparisEkle(urun)}>Sepete Ekle</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Meyveler</h2>
+          {meyveler.map((urun) => (
+            <Card key={urun.ad} className="mb-3">
+              <CardContent className="flex items-center gap-4">
+                <Image src={urun.resim} alt={urun.ad} width={60} height={60} className="rounded" />
+                <div className="flex-1">
+                  <div className="font-medium">{urun.ad}</div>
+                  <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} />
+                  <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} />
+                </div>
+                <Button onClick={() => siparisEkle(urun)}>Sepete Ekle</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
