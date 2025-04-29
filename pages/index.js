@@ -53,8 +53,6 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [firma, setFirma] = useState("");
   const [sepet, setSepet] = useState([]);
-  const [arama, setArama] = useState("");
-  const [miktar, setMiktar] = useState({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -83,8 +81,7 @@ export default function Home() {
   };
 
   const sepeteEkle = (urun) => {
-    const miktarDegeri = miktar[urun.ad] || "1";
-    setSepet([...sepet, { ...urun, miktar: miktarDegeri }]);
+    setSepet([...sepet, urun]);
   };
 
   const sepettenCikar = (index) => {
@@ -92,10 +89,6 @@ export default function Home() {
     yeniSepet.splice(index, 1);
     setSepet(yeniSepet);
   };
-
-  const filtrelenmisUrunler = urunler.filter((u) =>
-    u.ad.toLowerCase().includes(arama.toLowerCase())
-  );
 
   if (loading) {
     return (
@@ -107,17 +100,21 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-400 to-purple-600 text-white flex flex-col items-center justify-center p-4">
-        <Image src={Logo} alt="Logo" width={120} height={120} className="rounded-full shadow-md mb-6" />
+      <div className="min-h-screen bg-gradient-to-br from-green-200 to-green-500 text-white flex flex-col items-center justify-center p-4">
+        <div className="mb-4">
+          <Image src={Logo} alt="Logo" width={120} height={120} className="rounded-full shadow-md" />
+        </div>
         <Card className="w-full max-w-md text-black">
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4 text-center">Giriş yap veya kayıt ol</h2>
-            <Input placeholder="Firma Adı" value={firma} onChange={(e) => setFirma(e.target.value)} className="mb-2" />
-            <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-2" />
-            <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-4" />
-            <div className="flex gap-2">
-              <Button className="bg-yellow-400 hover:bg-yellow-500 text-white w-full" onClick={kaydol}>Kayıt Ol</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white w-full" onClick={girisYap}>Giriş Yap</Button>
+            <h2 className="text-xl font-semibold mb-6 text-center text-green-700">Giriş yap veya kayıt ol</h2>
+            <div className="flex flex-col gap-3">
+              <Input placeholder="Firma Adı" value={firma} onChange={(e) => setFirma(e.target.value)} />
+              <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <div className="flex gap-2 pt-2">
+                <Button className="bg-green-500 hover:bg-green-600 text-white w-full" onClick={kaydol}>Kayıt Ol</Button>
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full" onClick={girisYap}>Giriş Yap</Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -127,42 +124,22 @@ export default function Home() {
 
   return (
     <div className="p-4">
-      <header className="flex justify-between items-center mb-4 bg-purple-600 text-white p-4 rounded-lg">
-        <div className="flex items-center gap-4">
-          <Image src={Logo} alt="FreshMarkt Logo" width={50} height={50} />
-          <h1 className="text-xl font-bold">FreshMarkt</h1>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Hoşgeldin, {user.displayName}</h1>
         <div className="relative">
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">{sepet.length}</span>
-          <button className="text-2xl">🛒</button>
+          <button className="text-lg">🛒</button>
         </div>
-      </header>
-
-      <Input
-        type="text"
-        placeholder="Ürün ara..."
-        className="mb-4 border border-gray-300 px-3 py-2 rounded w-full"
-        value={arama}
-        onChange={(e) => setArama(e.target.value)}
-      />
-
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filtrelenmisUrunler.map((urun, i) => (
+        {urunler.map((urun, i) => (
           <Card key={i} className="shadow-md">
             <CardContent className="p-4">
               <Image src={urun.resim} alt={urun.ad} width={100} height={100} className="mb-2" />
               <h3 className="font-semibold text-lg">{urun.ad}</h3>
-              <p className="text-sm text-gray-600 mb-1">{urun.aciklama}</p>
-              <p className="text-sm mb-1">Birim: {urun.birim}</p>
-              <Input
-                type="number"
-                placeholder="Miktar"
-                min={1}
-                value={miktar[urun.ad] || ""}
-                onChange={(e) => setMiktar({ ...miktar, [urun.ad]: e.target.value })}
-                className="mb-2"
-              />
-              <Button className="w-full bg-green-600 text-white" onClick={() => sepeteEkle(urun)}>Sepete Ekle</Button>
+              <p className="text-sm text-gray-600">{urun.aciklama}</p>
+              <p className="text-sm">Birim: {urun.birim}</p>
+              <Button className="mt-2 w-full bg-green-600 text-white" onClick={() => sepeteEkle(urun.ad)}>Sepete Ekle</Button>
             </CardContent>
           </Card>
         ))}
@@ -176,7 +153,7 @@ export default function Home() {
           <ul className="space-y-2">
             {sepet.map((item, index) => (
               <li key={index} className="flex justify-between bg-gray-100 rounded px-4 py-2">
-                <span>{item.ad} - {item.miktar} {item.birim}</span>
+                <span>{item}</span>
                 <button onClick={() => sepettenCikar(index)} className="text-red-600 hover:underline">Kaldır</button>
               </li>
             ))}
