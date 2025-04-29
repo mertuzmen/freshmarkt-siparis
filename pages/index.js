@@ -53,6 +53,8 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [firma, setFirma] = useState("");
   const [sepet, setSepet] = useState([]);
+  const [arama, setArama] = useState("");
+  const [miktar, setMiktar] = useState({});
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -81,7 +83,8 @@ export default function Home() {
   };
 
   const sepeteEkle = (urun) => {
-    setSepet([...sepet, urun]);
+    const miktarDegeri = miktar[urun.ad] || "1";
+    setSepet([...sepet, { ...urun, miktar: miktarDegeri }]);
   };
 
   const sepettenCikar = (index) => {
@@ -89,6 +92,10 @@ export default function Home() {
     yeniSepet.splice(index, 1);
     setSepet(yeniSepet);
   };
+
+  const filtrelenmisUrunler = urunler.filter((u) =>
+    u.ad.toLowerCase().includes(arama.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -120,22 +127,42 @@ export default function Home() {
 
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Hoşgeldin, {user.displayName}</h1>
+      <header className="flex justify-between items-center mb-4 bg-purple-600 text-white p-4 rounded-lg">
+        <div className="flex items-center gap-4">
+          <Image src={Logo} alt="FreshMarkt Logo" width={50} height={50} />
+          <h1 className="text-xl font-bold">FreshMarkt</h1>
+        </div>
         <div className="relative">
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">{sepet.length}</span>
-          <button className="text-lg">🛒</button>
+          <button className="text-2xl">🛒</button>
         </div>
-      </div>
+      </header>
+
+      <Input
+        type="text"
+        placeholder="Ürün ara..."
+        className="mb-4 border border-gray-300 px-3 py-2 rounded w-full"
+        value={arama}
+        onChange={(e) => setArama(e.target.value)}
+      />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {urunler.map((urun, i) => (
+        {filtrelenmisUrunler.map((urun, i) => (
           <Card key={i} className="shadow-md">
             <CardContent className="p-4">
               <Image src={urun.resim} alt={urun.ad} width={100} height={100} className="mb-2" />
               <h3 className="font-semibold text-lg">{urun.ad}</h3>
-              <p className="text-sm text-gray-600">{urun.aciklama}</p>
-              <p className="text-sm">Birim: {urun.birim}</p>
-              <Button className="mt-2 w-full bg-green-600 text-white" onClick={() => sepeteEkle(urun.ad)}>Sepete Ekle</Button>
+              <p className="text-sm text-gray-600 mb-1">{urun.aciklama}</p>
+              <p className="text-sm mb-1">Birim: {urun.birim}</p>
+              <Input
+                type="number"
+                placeholder="Miktar"
+                min={1}
+                value={miktar[urun.ad] || ""}
+                onChange={(e) => setMiktar({ ...miktar, [urun.ad]: e.target.value })}
+                className="mb-2"
+              />
+              <Button className="w-full bg-green-600 text-white" onClick={() => sepeteEkle(urun)}>Sepete Ekle</Button>
             </CardContent>
           </Card>
         ))}
@@ -149,7 +176,7 @@ export default function Home() {
           <ul className="space-y-2">
             {sepet.map((item, index) => (
               <li key={index} className="flex justify-between bg-gray-100 rounded px-4 py-2">
-                <span>{item}</span>
+                <span>{item.ad} - {item.miktar} {item.birim}</span>
                 <button onClick={() => sepettenCikar(index)} className="text-red-600 hover:underline">Kaldır</button>
               </li>
             ))}
