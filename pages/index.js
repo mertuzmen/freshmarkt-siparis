@@ -1,4 +1,4 @@
-// YENİ TASARIM: FreshMarkt giriş ekranı kurumsal tasarımı ve sepet yönetimi
+// YENİ TASARIM: FreshMarkt giriş ekranı kurumsal tasarımı ve gelişmiş sepet yönetimi
 
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -39,6 +39,13 @@ initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
+const urunler = [
+  { ad: "Elma", aciklama: "Taze kırmızı elma", birim: "kg", resim: "/urunler/elma.png" },
+  { ad: "Domates", aciklama: "Organik domates", birim: "kg", resim: "/urunler/domates.png" },
+  { ad: "Muz", aciklama: "İthal muz", birim: "kg", resim: "/urunler/muz.png" },
+  { ad: "Salatalık", aciklama: "Seradan taze salatalık", birim: "kg", resim: "/urunler/salatalik.png" },
+];
+
 export default function Home() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +53,6 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [firma, setFirma] = useState("");
   const [sepet, setSepet] = useState([]);
-  const [urun, setUrun] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -74,11 +80,8 @@ export default function Home() {
     setSepet([]);
   };
 
-  const sepeteEkle = () => {
-    if (urun) {
-      setSepet([...sepet, urun]);
-      setUrun("");
-    }
+  const sepeteEkle = (urun) => {
+    setSepet([...sepet, urun]);
   };
 
   const sepettenCikar = (index) => {
@@ -97,9 +100,8 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-200 to-green-500 text-white flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-400 to-purple-600 text-white flex flex-col items-center justify-center p-4">
         <Image src={Logo} alt="Logo" width={120} height={120} className="rounded-full shadow-md mb-6" />
-        <h1 className="text-4xl font-bold mb-2 text-center">Dakikalar İçinde Kapında</h1>
         <Card className="w-full max-w-md text-black">
           <CardContent className="p-6">
             <h2 className="text-xl font-semibold mb-4 text-center">Giriş yap veya kayıt ol</h2>
@@ -107,8 +109,8 @@ export default function Home() {
             <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-2" />
             <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-4" />
             <div className="flex gap-2">
-              <Button className="bg-green-600 hover:bg-green-700 text-white w-full" onClick={kaydol}>Kayıt Ol</Button>
-              <Button className="bg-gray-800 hover:bg-black text-white w-full" onClick={girisYap}>Giriş Yap</Button>
+              <Button className="bg-yellow-400 hover:bg-yellow-500 text-white w-full" onClick={kaydol}>Kayıt Ol</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white w-full" onClick={girisYap}>Giriş Yap</Button>
             </div>
           </CardContent>
         </Card>
@@ -118,27 +120,43 @@ export default function Home() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Hoşgeldin, {user.displayName}</h1>
-      <Input
-        placeholder="Ürün adı girin"
-        value={urun}
-        onChange={(e) => setUrun(e.target.value)}
-        className="mb-2"
-      />
-      <Button onClick={sepeteEkle} className="mb-4 bg-green-500 hover:bg-green-600 text-white">Sepete Ekle</Button>
-      <h2 className="text-xl font-semibold mb-2">Sepetim</h2>
-      {sepet.length === 0 ? (
-        <p className="text-gray-600">Sepetiniz boş</p>
-      ) : (
-        <ul className="space-y-2">
-          {sepet.map((item, index) => (
-            <li key={index} className="flex justify-between bg-gray-100 rounded px-4 py-2">
-              <span>{item}</span>
-              <button onClick={() => sepettenCikar(index)} className="text-red-600 hover:underline">Kaldır</button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Hoşgeldin, {user.displayName}</h1>
+        <div className="relative">
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">{sepet.length}</span>
+          <button className="text-lg">🛒</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {urunler.map((urun, i) => (
+          <Card key={i} className="shadow-md">
+            <CardContent className="p-4">
+              <Image src={urun.resim} alt={urun.ad} width={100} height={100} className="mb-2" />
+              <h3 className="font-semibold text-lg">{urun.ad}</h3>
+              <p className="text-sm text-gray-600">{urun.aciklama}</p>
+              <p className="text-sm">Birim: {urun.birim}</p>
+              <Button className="mt-2 w-full bg-green-600 text-white" onClick={() => sepeteEkle(urun.ad)}>Sepete Ekle</Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-2">Sepetim</h2>
+        {sepet.length === 0 ? (
+          <p className="text-gray-600">Sepetiniz boş</p>
+        ) : (
+          <ul className="space-y-2">
+            {sepet.map((item, index) => (
+              <li key={index} className="flex justify-between bg-gray-100 rounded px-4 py-2">
+                <span>{item}</span>
+                <button onClick={() => sepettenCikar(index)} className="text-red-600 hover:underline">Kaldır</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div className="mt-6">
         <Button onClick={cikisYap} className="bg-red-500 hover:bg-red-600 text-white">Çıkış Yap</Button>
       </div>
