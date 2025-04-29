@@ -1,4 +1,4 @@
-// GÜNCEL TASARIM: Ürün Kartlarında Lokal Miktar/Not - Mobil Uyumlu
+// GÜNCEL TASARIM: Getir Benzeri Kartlar, Ürün Bilgisi (kg/adet), Arka Plan Beyaz
 
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -110,14 +110,14 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-green-100 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-lime-100 to-lime-200 p-4">
         <Image src={Logo} alt="Logo" width={120} height={120} className="mb-4" />
         <Input placeholder="Firma Adı" value={firma} onChange={(e) => setFirma(e.target.value)} className="mb-2" />
         <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-2" />
         <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-4" />
         <div className="flex gap-2">
-          <Button onClick={kaydol}>Kaydol</Button>
-          <Button onClick={girisYap}>Giriş Yap</Button>
+          <Button onClick={kaydol} className="bg-yellow-500 hover:bg-yellow-600 text-white">Kaydol</Button>
+          <Button onClick={girisYap} className="bg-lime-600 hover:bg-lime-700 text-white">Giriş Yap</Button>
         </div>
       </div>
     );
@@ -128,36 +128,36 @@ export default function Home() {
     const [not, setNot] = useState("");
 
     return (
-      <Card key={urun.ad} className="mb-3">
-        <CardContent className="flex items-center gap-4">
-          <Image src={urun.resim} alt={urun.ad} width={60} height={60} className="rounded" />
-          <div className="flex-1">
-            <div className="font-medium">{urun.ad}</div>
-            <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} className="mb-1" />
-            <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} />
-          </div>
-          <Button onClick={() => siparisEkle(urun, miktar, not)}>Sepete Ekle</Button>
+      <Card key={urun.ad} className="mb-4 shadow-lg border">
+        <CardContent className="text-center p-4">
+          <Image src={urun.resim} alt={urun.ad} width={80} height={80} className="mx-auto mb-2" />
+          <div className="font-semibold text-lg mb-1">{urun.ad}</div>
+          <div className="text-sm text-gray-500 mb-2">Birim: {urun.birim}</div>
+          <Input placeholder={`Miktar (${urun.birim})`} value={miktar} onChange={(e) => setMiktar(e.target.value)} className="mb-2" />
+          <Input placeholder="Not" value={not} onChange={(e) => setNot(e.target.value)} className="mb-2" />
+          <Button onClick={() => siparisEkle(urun, miktar, not)} className="bg-lime-600 hover:bg-lime-700 text-white">Sepete Ekle</Button>
         </CardContent>
       </Card>
     );
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-xl font-bold">Hoşgeldin {user.displayName}</h1>
-        <Button onClick={cikisYap}>Çıkış</Button>
+    <div className="min-h-screen bg-white p-4">
+      <div className="flex justify-between items-center mb-6">
+        <Image src={Logo} alt="FreshMarkt" width={100} height={100} />
+        <Button onClick={cikisYap} className="bg-red-500 hover:bg-red-600 text-white">Çıkış Yap</Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-lg font-semibold mb-2">Sebzeler</h2>
+          <h2 className="text-xl font-bold text-lime-700 mb-4">Sebzeler</h2>
           {sebzeler.map((urun) => (
             <UrunKart key={urun.ad} urun={urun} />
           ))}
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-2">Meyveler</h2>
+          <h2 className="text-xl font-bold text-yellow-700 mb-4">Meyveler</h2>
           {meyveler.map((urun) => (
             <UrunKart key={urun.ad} urun={urun} />
           ))}
